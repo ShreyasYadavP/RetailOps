@@ -67,3 +67,6 @@ if __name__ == "__main__":
     retail_data = generate_data()
     print(retail_data.head(10).to_string(index=False))
     print(f"\nRows: {len(retail_data)} | Columns: {len(retail_data.columns)}")
+
+generate_retail_data = generate_data
+
