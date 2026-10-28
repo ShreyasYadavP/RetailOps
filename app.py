@@ -3,7 +3,7 @@ import pandas as pd
 from generate_data import generate_retail_data
 from anova_engine import run_anova
 from diagnostics_testing import run_diagnostics
-from visualizations import plot_sales_by_region, plot_footfall_vs_sales
+from visualizations import plot_sales_by_region, plot_footfall_vs_sales, plot_total_sales_by_region
 
 st.set_page_config(page_title="RetailOps Analytics", layout="wide")
 
@@ -90,6 +90,7 @@ with tab2:
     try:
         st.plotly_chart(plot_sales_by_region(filtered_df), use_container_width=True)
         st.plotly_chart(plot_footfall_vs_sales(filtered_df), use_container_width=True)
+        st.plotly_chart(plot_total_sales_by_region(filtered_df), use_container_width=True)
     except Exception as e:
         st.error(f"Could not render visualizations. Please verify your mapped columns. Error: {e}")
 
