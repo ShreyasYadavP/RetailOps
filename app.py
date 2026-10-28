@@ -3,7 +3,8 @@ import pandas as pd
 from generate_data import generate_retail_data
 from anova_engine import run_anova
 from diagnostics_testing import run_diagnostics
-from visualizations import plot_sales_by_region, plot_footfall_vs_sales, plot_total_sales_by_region
+
+from visualizations import plot_sales_by_region, plot_footfall_vs_sales, plot_total_sales_by_region, plot_sales_by_region, plot_footfall_vs_sales, plot_category_bar, plot_marketing_efficiency
 
 st.set_page_config(page_title="RetailOps Analytics", layout="wide")
 
@@ -91,24 +92,56 @@ with tab2:
         st.plotly_chart(plot_sales_by_region(filtered_df), use_container_width=True)
         st.plotly_chart(plot_footfall_vs_sales(filtered_df), use_container_width=True)
         st.plotly_chart(plot_total_sales_by_region(filtered_df), use_container_width=True)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(plot_marketing_efficiency(filtered_df), use_container_width=True)
+        with col2:
+            st.plotly_chart(plot_category_bar(filtered_df), use_container_width=True)
+
     except Exception as e:
-        st.error(f"Could not render visualizations. Please verify your mapped columns. Error: {e}")
+        st.error(f"Could not render visualizations. Error: {e}")
 
 with tab3:
-    st.subheader("One-Way ANOVA Statistical Results")
-    try:
-        anova_res = run_anova(filtered_df)
-        col1, col2, col3 = st.columns(3)
-        col1.metric("F-Statistic", anova_res["F-Statistic"])
-        col2.metric("P-Value", anova_res["P-Value"])
-        col3.metric("Significant Difference?", str(anova_res["Significant"]))
-    except Exception as e:
-        st.error(f"ANOVA calculation failed. Ensure numeric 'Sales_Revenue' and categorical 'Region' are properly mapped. Error: {e}")
+  st.subheader("One-Way ANOVA Statistical Results")
+  try:
+    anova_res = run_anova(filtered_df)
+    if anova_res:
+      col1, col2, col3 = st.columns(3)
+      col1.metric("F-Statistic", f"{anova_res['F-Statistic']:.4f}")
+      col2.metric("P-Value", f"{anova_res['P-Value']:.4f}")
+      col3.metric(
+          "Significant Difference?", str(anova_res["Significant"])
+      )
+
+      st.markdown("---")
+      st.markdown("### **ANOVA Table (Sum of Squares Breakdown)**")
+      st.dataframe(anova_res["ANOVA_Table"], use_container_width=True)
+
+      st.markdown("### **Group-Level Descriptive Statistics**")
+      st.dataframe(anova_res["Group_Summary"], use_container_width=True)
+    else:
+      st.error("Could not compute ANOVA. Please verify column selections.")
+  except Exception as e:
+    st.error(f"ANOVA calculation failed: {e}")
 
 with tab4:
-    st.subheader("Statistical Assumptions Diagnostics")
-    try:
-        diag_res = run_diagnostics(filtered_df)
-        st.write("Diagnostic Testing Results:", diag_res)
-    except Exception as e:
-        st.error(f"Diagnostics routine failed: {e}")
+  st.subheader("Statistical Assumptions Diagnostics")
+  st.markdown(
+      "Verifying parametric prerequisites for ANOVA: **Normality** (Shapiro-Wilk"
+      " test) and **Homoscedasticity** (Levene's test)."
+  )
+  try:
+    diag_res = run_diagnostics(filtered_df)
+    if "Error" not in diag_res:
+      # Display summary table
+      st.markdown("### **Diagnostics Summary Table**")
+      st.dataframe(diag_res["Diagnostics_Table"], use_container_width=True)
+
+      st.markdown("---")
+      st.markdown("### **Raw Diagnostic Output (JSON)**")
+      st.json(diag_res)
+    else:
+      st.error(f"Diagnostics routine failed: {diag_res['Error']}")
+  except Exception as e:
+    st.error(f"Diagnostics routine failed: {e}")
