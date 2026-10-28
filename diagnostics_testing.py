@@ -4,6 +4,20 @@ from scipy import stats
 
 def run_diagnostics(df, group_col="Region", value_col="Sales_Revenue"):
   try:
+        if df.empty:
+        return {"Error": "The dataset is empty."}
+
+    if group_col not in df.columns:
+        return {"Error": f"Group column '{group_col}' not found."}
+
+    if value_col not in df.columns:
+        return {"Error": f"Value column '{value_col}' not found."}
+
+    if df[value_col].dropna().shape[0] < 3:
+        return {"Error": "At least 3 valid observations are required."}
+
+    if df[group_col].nunique() < 2:
+        return {"Error": "At least 2 groups are required for Levene's test."}
     # 1. Shapiro-Wilk Normality Test
     shapiro_stat, shapiro_p = stats.shapiro(df[value_col].dropna())
     normality_passed = bool(shapiro_p > 0.05)
