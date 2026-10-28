@@ -3,9 +3,8 @@ import pandas as pd
 from generate_data import generate_retail_data
 from anova_engine import run_anova
 from diagnostics_testing import run_diagnostics
-from visualizations import plot_sales_by_region, plot_footfall_vs_sales, plot_category_bar, plot_marketing_efficiency
 
-
+from visualizations import plot_sales_by_region, plot_footfall_vs_sales, plot_total_sales_by_region, plot_sales_by_region, plot_footfall_vs_sales, plot_category_bar, plot_marketing_efficiency
 
 st.set_page_config(page_title="RetailOps Analytics", layout="wide")
 
@@ -88,28 +87,20 @@ with tab1:
     st.write(f"**Total Rows:** {len(filtered_df)} | **Total Columns:** {len(filtered_df.columns)}")
 
 with tab2:
-  st.subheader("Interactive Advanced Visual Analytics")
-  try:
-    # Row 1: Box Plot & Scatter Regression
-    st.plotly_chart(plot_sales_by_region(filtered_df), use_container_width=True)
-    st.plotly_chart(
-        plot_footfall_vs_sales(filtered_df), use_container_width=True
-    )
+    st.subheader("Interactive Visual Analytics")
+    try:
+        st.plotly_chart(plot_sales_by_region(filtered_df), use_container_width=True)
+        st.plotly_chart(plot_footfall_vs_sales(filtered_df), use_container_width=True)
+        st.plotly_chart(plot_total_sales_by_region(filtered_df), use_container_width=True)
 
-    # Row 2: Marketing Efficiency & Category Breakdown side-by-side
-    col_v1, col_v2 = st.columns(2)
-    with col_v1:
-      st.plotly_chart(
-          plot_marketing_efficiency(filtered_df), use_container_width=True
-      )
-    with col_v2:
-      st.plotly_chart(plot_category_bar(filtered_df), use_container_width=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(plot_marketing_efficiency(filtered_df), use_container_width=True)
+        with col2:
+            st.plotly_chart(plot_category_bar(filtered_df), use_container_width=True)
 
-  except Exception as e:
-    st.error(
-        f"Could not render visualizations. Please verify your mapped columns."
-        f" Error: {e}"
-    )
+    except Exception as e:
+        st.error(f"Could not render visualizations. Error: {e}")
 
 with tab3:
   st.subheader("One-Way ANOVA Statistical Results")
